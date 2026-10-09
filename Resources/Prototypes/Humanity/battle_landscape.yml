@@ -19,6 +19,7 @@
     explosionDamageMultiplier: 0.85
     proneExplosionDamageMultiplier: 0.65
     enterDelay: 1
+    exitDelay: 1
 
 - type: entity
   id: HumanityBattleRubble

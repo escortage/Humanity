@@ -60,7 +60,7 @@ public sealed partial class BattleCraterSystem : EntitySystem
         while (bodies.MoveNext(out var uid, out _, out var sprite))
         {
             var target = TryComp<BattleCraterEntryComponent>(uid, out var entry)
-                && entry.Action == null && entry.Crater is { } crater && _entry.IsInside(uid, crater)
+                && entry.Entered && entry.Crater is { } crater && _entry.IsInside(uid, crater)
                 ? visuals.BodyDepth : 0f;
             _depths.TryGetValue(uid, out var old);
             if (target == 0 && old == 0)

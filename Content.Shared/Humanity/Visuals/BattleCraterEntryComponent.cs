@@ -10,6 +10,9 @@ public sealed partial class BattleCraterEntryComponent : Component
     public EntityUid? Crater;
 
     [DataField, AutoNetworkedField]
+    public bool Entered;
+
+    [DataField, AutoNetworkedField]
     public ushort? Action;
 
     [DataField, AutoNetworkedField]

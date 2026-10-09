@@ -8,7 +8,6 @@
   rules:
     - RespawnDeadRuleTDMFixed
     - GracewallRule
-    - CaptureAreaRule
     - TeamDeathMatchRuleWW2
     - RandomWeatherRule
 

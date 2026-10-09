@@ -10,6 +10,7 @@
     xmlns:controls="clr-namespace:Content.Client.UserInterface.Controls"
     xmlns:inventory="clr-namespace:Content.Client.UserInterface.Systems.Inventory.Widgets"
     xmlns:targeting="clr-namespace:Content.Client._Shitmed.UserInterface.Systems.Targeting.Widgets"
+    xmlns:battle="clr-namespace:Content.Client.Humanity.Combat"
     Name="DefaultHud"
     VerticalExpand="False"
     VerticalAlignment="Bottom"
@@ -34,6 +35,7 @@
         <actions:ActionsBar Name="Actions"
                             Access="Protected"/>
     </BoxContainer>
+    <battle:BattleScoreControl Name="BattleScore" Access="Protected"/>
     <widgets:GhostGui Name="Ghost"
                       Access="Protected"/>
     <inventory:InventoryGui Name="Inventory"

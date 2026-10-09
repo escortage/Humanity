@@ -8,12 +8,10 @@ using Content.Shared.Interaction.Events;
 using Content.Shared.Mind;
 using Content.Shared.Mobs;
 using Content.Shared.Players;
-using Robust.Server.Player;
 using Robust.Shared.Network;
 using Robust.Shared.Player;
 using Robust.Shared.Timing;
 using Robust.Shared.Utility;
-using Content.Server.Chat.Systems;
 
 namespace Content.Server.GameTicking.Rules;
 
@@ -24,9 +22,7 @@ public sealed partial class RespawnRuleSystem : GameRuleSystem<RespawnDeadRuleCo
 {
     [Dependency] private IChatManager _chatManager = default!;
     [Dependency] private IGameTiming _timing = default!;
-    [Dependency] private IPlayerManager _playerManager = default!;
     [Dependency] private ServerStationSystem _station = default!;
-    [Dependency] private ChatSystem _chat = default!;
 
     /// <inheritdoc/>
     public override void Initialize()
@@ -69,9 +65,7 @@ public sealed partial class RespawnRuleSystem : GameRuleSystem<RespawnDeadRuleCo
             {
                 if (_timing.CurTime >= tracker.GlobalTimer)
                 {
-                    var announcementMessage = "Подкрепления доступны. Вступайте через лобби.";
                     RespawnFixed(tracker);
-                    _chat.DispatchGlobalAnnouncement(announcementMessage, "Round", false, null, Color.Yellow);
                     tracker.GlobalTimer = _timing.CurTime + tracker.RespawnDelay;
                 }
             }

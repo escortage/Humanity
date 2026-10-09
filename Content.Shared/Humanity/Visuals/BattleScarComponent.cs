@@ -31,4 +31,7 @@ public sealed partial class BattleScarComponent : Component
 
     [DataField]
     public TimeSpan EnterDelay = TimeSpan.FromSeconds(1);
+
+    [DataField]
+    public TimeSpan ExitDelay = TimeSpan.FromSeconds(1);
 }

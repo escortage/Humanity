@@ -3,6 +3,7 @@ using System.Numerics;
 using Content.Client.Animations;
 using Content.Client.Clickable;
 using Content.Client.Items;
+using Content.Client.Humanity.Combat;
 using Content.Client.Weapons.Ranged.Components;
 using Content.Shared.Camera;
 using Content.Shared.CCVar;
@@ -22,6 +23,7 @@ using Robust.Client.Graphics;
 using Robust.Client.Input;
 using Robust.Client.Physics;
 using Robust.Client.Player;
+using Robust.Client.UserInterface;
 using Robust.Shared.Animations;
 using Robust.Shared.Audio;
 using Robust.Shared.Configuration;
@@ -44,6 +46,7 @@ public sealed partial class GunSystem : SharedGunSystem
     [Dependency] private InputSystem _inputSystem = default!;
     [Dependency] private IOverlayManager _overlayManager = default!;
     [Dependency] private IPlayerManager _player = default!;
+    [Dependency] private IUserInterfaceManager _ui = default!;
     [Dependency] private IConfigurationManager _cfg = default!;
     [Dependency] private AnimationPlayerSystem _animPlayer = default!;
     [Dependency] private ClickableSystem _clickable = default!;
@@ -177,7 +180,8 @@ public sealed partial class GunSystem : SharedGunSystem
 
         var useKey = gun.Comp.UseKey ? EngineKeyFunctions.Use : EngineKeyFunctions.UseSecondary;
 
-        if (_inputSystem.CmdStates.GetState(useKey) != BoundKeyState.Down && !gun.Comp.BurstActivated)
+        if (!GameplayAimInput.CanAim(_ui)
+            || (_inputSystem.CmdStates.GetState(useKey) != BoundKeyState.Down && !gun.Comp.BurstActivated))
         {
             if (gun.Comp.ShotCounter != 0)
                 RaisePredictiveEvent(new RequestStopShootEvent { Gun = GetNetEntity(gun) });

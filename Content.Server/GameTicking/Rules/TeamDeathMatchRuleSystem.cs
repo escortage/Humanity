@@ -34,6 +34,8 @@ public sealed partial class TeamDeathMatchRuleSystem : GameRuleSystem<TeamDeathM
         base.Initialize();
         SubscribeLocalEvent<PlayerSpawnCompleteEvent>(OnSpawnComplete);
         SubscribeLocalEvent<KillReportedEvent>(OnKillReported);
+        SubscribeNetworkEvent<RequestBattleScoreEvent>(OnRequestScore);
+        SubscribeLocalEvent<RoundRestartCleanupEvent>(OnScoreReset);
     }
 
     protected override void Started(EntityUid uid, TeamDeathMatchRuleComponent component, GameRuleComponent rule, GameRuleStartedEvent args)
@@ -48,7 +50,8 @@ public sealed partial class TeamDeathMatchRuleSystem : GameRuleSystem<TeamDeathM
             }
         }
         if (component.RoundDuration > 0)
-            _chat.DispatchGlobalAnnouncement("Задача - захватить центр карты. Подкрепления будут каждые 2 минуты, а сам бой длится 45 минут.", "Штаб", false, null, Color.Yellow);
+            _chat.DispatchGlobalAnnouncement(Loc.GetString("humanity-ww2-objective", ("minutes", component.RoundDuration / 60)), "Штаб", false, null, Color.Yellow);
+        BroadcastScore(component);
     }
 
     public override void Update(float frameTime)
@@ -119,6 +122,7 @@ public sealed partial class TeamDeathMatchRuleSystem : GameRuleSystem<TeamDeathM
                 match.KDRatio[user] = stats = new PlayerKDStats();
             stats.Name = args.Player.Name;
             stats.Team = team;
+            BroadcastScore(match);
         }
     }
 
@@ -197,6 +201,7 @@ public sealed partial class TeamDeathMatchRuleSystem : GameRuleSystem<TeamDeathM
                 if (factions.MoveNext(out _, out var data))
                     _factionIcons.RecalculateAllCivFactionSquadCounts(data);
             }
+            BroadcastScore(match);
         }
     }
 

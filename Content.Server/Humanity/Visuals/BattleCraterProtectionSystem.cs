@@ -31,7 +31,7 @@ public sealed partial class BattleCraterProtectionSystem : EntitySystem
     private float GetDamageMultiplier(EntityUid uid, StandingStateComponent standing)
     {
         if (!TryComp<BattleCraterEntryComponent>(uid, out var entry)
-            || entry.Action != null || entry.Crater is not { } crater || !_entry.IsInside(uid, crater))
+            || !entry.Entered || entry.Crater is not { } crater || !_entry.IsInside(uid, crater))
             return 1f;
 
         var scar = Comp<BattleScarComponent>(crater);

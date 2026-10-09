@@ -204,7 +204,8 @@ public sealed partial class ExplosionSystem
         float? fireStacks,
         float? temperature,
         float currentIntensity,
-        EntityUid? cause)
+        EntityUid? cause,
+        EntityUid? user)
     {
         var size = grid.Comp.TileSize;
         var gridBox = new Box2(tile * size, (tile + 1) * size);
@@ -233,7 +234,7 @@ public sealed partial class ExplosionSystem
         // process those entities
         foreach (var (uid, xform) in list)
         {
-            ProcessEntity(uid, epicenter, damage, throwForce, id, xform, fireStacks, cause);
+            ProcessEntity(uid, epicenter, damage, throwForce, id, xform, fireStacks, cause, user);
         }
 
         // heat the atmosphere
@@ -253,7 +254,7 @@ public sealed partial class ExplosionSystem
         foreach (var entity in _anchored)
         {
             processed.Add(entity);
-            ProcessEntity(entity, epicenter, damage, throwForce, id, null, fireStacks, cause);
+            ProcessEntity(entity, epicenter, damage, throwForce, id, null, fireStacks, cause, user);
             tileBlocked |= IsBlockingTurf(entity);
         }
         _anchored.Clear();
@@ -277,7 +278,7 @@ public sealed partial class ExplosionSystem
         {
             // Here we only throw, no dealing damage. Containers n such might drop their entities after being destroyed, but
             // they should handle their own damage pass-through, with their own damage reduction calculation.
-            ProcessEntity(uid, epicenter, null, throwForce, id, xform, null, cause);
+            ProcessEntity(uid, epicenter, null, throwForce, id, xform, null, cause, user);
         }
 
         return !tileBlocked;
@@ -314,7 +315,8 @@ public sealed partial class ExplosionSystem
         HashSet<EntityUid> processed,
         string id,
         float? fireStacks,
-        EntityUid? cause)
+        EntityUid? cause,
+        EntityUid? user)
     {
         var gridBox = Box2.FromDimensions(tile * DefaultTileSize, new Vector2(DefaultTileSize, DefaultTileSize));
         var worldBox = spaceMatrix.TransformBox(gridBox);
@@ -330,7 +332,7 @@ public sealed partial class ExplosionSystem
         foreach (var (uid, xform) in state.Item1)
         {
             processed.Add(uid);
-            ProcessEntity(uid, epicenter, damage, throwForce, id, xform, fireStacks, cause);
+            ProcessEntity(uid, epicenter, damage, throwForce, id, xform, fireStacks, cause, user);
         }
 
         if (throwForce <= 0)
@@ -344,7 +346,7 @@ public sealed partial class ExplosionSystem
 
         foreach (var (uid, xform) in list)
         {
-            ProcessEntity(uid, epicenter, null, throwForce, id, xform, fireStacks, cause);
+            ProcessEntity(uid, epicenter, null, throwForce, id, xform, fireStacks, cause, user);
         }
     }
 
@@ -398,7 +400,7 @@ public sealed partial class ExplosionSystem
         return damage;
     }
 
-    private void DamageExplosionLimb(EntityUid uid, DamageSpecifier damage, float multiplier)
+    private void DamageExplosionLimb(EntityUid uid, DamageSpecifier damage, float multiplier, EntityUid? user)
     {
         if (multiplier <= 0 || !damage.DamageDict.Any(entry => entry.Value > 0 && entry.Key.Id is "Blunt" or "Slash" or "Piercing"))
             return;
@@ -412,7 +414,7 @@ public sealed partial class ExplosionSystem
             return;
 
         var limb = _robustRandom.Pick(limbs);
-        _damageableSystem.ChangeBodyDamage(limb.Id, damage * multiplier, ignoreResistances: true);
+        _damageableSystem.ChangeBodyDamage(limb.Id, damage * multiplier, ignoreResistances: true, origin: user);
     }
 
     private void GetEntitiesToDamage(EntityUid uid, DamageSpecifier originalDamage, string prototype)
@@ -460,7 +462,8 @@ public sealed partial class ExplosionSystem
         string id,
         TransformComponent? xform,
         float? fireStacksOnIgnite,
-        EntityUid? cause)
+        EntityUid? cause,
+        EntityUid? user)
     {
         if (originalDamage is not null)
         {
@@ -471,9 +474,8 @@ public sealed partial class ExplosionSystem
                 if (!_damageableQuery.TryComp(entity, out var damageable))
                     continue;
 
-                // TODO EXPLOSIONS turn explosions into entities, and pass the the entity in as the damage origin.
-                _damageableSystem.ChangeBodyDamage(entity, damage, ignoreResistances: true, partMultiplier: prototype.BodyPartDamageMultiplier);
-                DamageExplosionLimb(entity, damage, prototype.LimbDamageMultiplier - prototype.BodyPartDamageMultiplier);
+                _damageableSystem.ChangeBodyDamage(entity, damage, ignoreResistances: true, origin: user, partMultiplier: prototype.BodyPartDamageMultiplier);
+                DamageExplosionLimb(entity, damage, prototype.LimbDamageMultiplier - prototype.BodyPartDamageMultiplier, user);
 
                 if (_actorQuery.HasComp(entity))
                 {
@@ -732,6 +734,7 @@ sealed class Explosion
     public readonly EntityUid VisualEnt;
 
     public readonly EntityUid? Cause;
+    public readonly EntityUid? User;
 
     /// <summary>
     ///     Initialize a new instance for processing
@@ -750,12 +753,14 @@ sealed class Explosion
         IEntityManager entMan,
         EntityUid visualEnt,
         EntityUid? cause,
+        EntityUid? user,
         SharedMapSystem mapSystem,
         DamageableSystem damageable,
         EntityQuery<TileHistoryComponent> historyQuery)
     {
         VisualEnt = visualEnt;
         Cause = cause;
+        User = user;
         _system = system;
         _mapSystem = mapSystem;
         ExplosionType = explosionType;
@@ -922,7 +927,8 @@ sealed class Explosion
                     ExplosionType.FireStacks,
                     ExplosionType.Temperature,
                     _currentIntensity,
-                    Cause);
+                    Cause,
+                    User);
 
                 // If the floor is not blocked by some dense object, damage the floor tiles.
                 if (canDamageFloor)
@@ -958,7 +964,8 @@ sealed class Explosion
                     ProcessedEntities,
                     ExplosionType.ID,
                     ExplosionType.FireStacks,
-                    Cause);
+                    Cause,
+                    User);
             }
 
             if (!MoveNext())
@@ -1002,4 +1009,5 @@ public sealed class QueuedExplosion(ExplosionPrototype proto)
     public int MaxTileBreak;
     public bool CanCreateVacuum;
     public EntityUid? Cause; // The entity that exploded, for logging purposes.
+    public EntityUid? User;
 }

@@ -31,10 +31,18 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
             return;
 
         ent.Comp.Action = null;
-        if (args.Cancelled || ent.Comp.Crater is not { } crater || !Exists(crater))
+        if (ent.Comp.Crater is not { } crater || !Exists(crater))
+        {
             ent.Comp.Crater = null;
+            ent.Comp.Entered = false;
+        }
+        else if (args.Cancelled)
+        {
+            if (!ent.Comp.Entered)
+                ent.Comp.Crater = null;
+        }
         else
-            _transforms.SetCoordinates(ent, ent.Comp.Destination);
+            CompleteCrossing(ent);
         Dirty(ent);
         args.Handled = true;
     }
@@ -52,24 +60,39 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
 
         if (TryComp<BattleCraterEntryComponent>(ent, out var entry) && entry.Crater is { } current)
         {
-            if (IsInside(ent, current, true))
+            var inside = IsInside(ent, current, true);
+            if (entry.Action != null)
             {
-                if (entry.Action != null)
+                if (inside != entry.Entered)
                     RestorePosition(ent, args.OldPosition);
                 return;
             }
-            if (entry.Action != null)
+            if (entry.Entered && inside)
                 return;
+
+            if (entry.Entered && TryComp<BattleScarComponent>(current, out _) && HasComp<DoAfterComponent>(ent))
+            {
+                StartCrossing((ent, entry), current, args);
+                return;
+            }
             entry.Crater = null;
+            entry.Entered = false;
             Dirty(ent, entry);
         }
 
         if (!HasComp<DoAfterComponent>(ent) || FindCrater(ent, ent.Comp) is not { } crater)
             return;
 
-        var destination = args.NewPosition;
+        entry = EnsureComp<BattleCraterEntryComponent>(ent);
+        StartCrossing((ent, entry), crater, args);
+    }
+
+    private void StartCrossing(Entity<BattleCraterEntryComponent> ent, EntityUid crater, MoveEvent args)
+    {
         RestorePosition(ent, args.OldPosition);
-        var doAfter = new DoAfterArgs(EntityManager, ent, Comp<BattleScarComponent>(crater).EnterDelay,
+        var scar = Comp<BattleScarComponent>(crater);
+        var delay = ent.Comp.Entered ? scar.ExitDelay : scar.EnterDelay;
+        var doAfter = new DoAfterArgs(EntityManager, ent, delay,
             new BattleCraterEnterDoAfterEvent(), ent, target: crater)
         {
             RequireCanInteract = false,
@@ -79,13 +102,20 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
         if (!_doAfter.TryStartDoAfter(doAfter, out var id))
             return;
 
-        entry = EnsureComp<BattleCraterEntryComponent>(ent);
-        entry.Crater = crater;
-        entry.Action = _doAfter.IsRunning(id) ? id.Value.Index : null;
-        entry.Destination = destination;
-        Dirty(ent, entry);
-        if (entry.Action == null)
-            _transforms.SetCoordinates(ent, destination);
+        ent.Comp.Crater = crater;
+        ent.Comp.Action = _doAfter.IsRunning(id) ? id.Value.Index : null;
+        ent.Comp.Destination = args.NewPosition;
+        if (ent.Comp.Action == null)
+            CompleteCrossing(ent);
+        Dirty(ent);
+    }
+
+    private void CompleteCrossing(Entity<BattleCraterEntryComponent> ent)
+    {
+        ent.Comp.Entered = !ent.Comp.Entered;
+        if (!ent.Comp.Entered)
+            ent.Comp.Crater = null;
+        RestorePosition(ent, ent.Comp.Destination);
     }
 
     private void RestorePosition(EntityUid uid, EntityCoordinates coordinates)

@@ -241,7 +241,7 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
 
         var posFound = _transformSystem.TryGetMapOrGridCoordinates(uid, out var gridPos, pos);
 
-        QueueExplosion(mapPos, typeId, totalIntensity, slope, maxTileIntensity, uid, tileBreakScale, maxTileBreak, canCreateVacuum, addLog: false);
+        QueueExplosion(mapPos, typeId, totalIntensity, slope, maxTileIntensity, uid, tileBreakScale, maxTileBreak, canCreateVacuum, addLog: false, user: user);
 
         if (!addLog)
             return;
@@ -277,7 +277,8 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         float tileBreakScale = 1f,
         int maxTileBreak = int.MaxValue,
         bool canCreateVacuum = true,
-        bool addLog = true)
+        bool addLog = true,
+        EntityUid? user = null)
     {
         if (totalIntensity <= 0 || slope <= 0)
             return;
@@ -295,7 +296,7 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
         foreach (var queued in _queuedExplosions)
         {
             // ignore different types or those on different maps
-            if (queued.Proto.ID != type.ID || queued.Epicenter.MapId != epicenter.MapId)
+            if (queued.Proto.ID != type.ID || queued.Epicenter.MapId != epicenter.MapId || queued.User != user)
                 continue;
 
             var dst2 = queued.Proto.MaxCombineDistance * queued.Proto.MaxCombineDistance;
@@ -317,7 +318,8 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
             TileBreakScale = tileBreakScale,
             MaxTileBreak = maxTileBreak,
             CanCreateVacuum = canCreateVacuum,
-            Cause = cause
+            Cause = cause,
+            User = user
         };
         _explosionQueue.Enqueue(boom);
         _queuedExplosions.Add(boom);
@@ -392,6 +394,7 @@ public sealed partial class ExplosionSystem : SharedExplosionSystem
             EntityManager,
             visualEnt,
             queued.Cause,
+            queued.User,
             _map,
             _damageableSystem,
             _tileHistoryQuery);

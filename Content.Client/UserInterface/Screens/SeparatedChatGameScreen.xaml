@@ -11,6 +11,7 @@
     xmlns:graphics="clr-namespace:Robust.Client.Graphics;assembly=Robust.Client"
     xmlns:inventory="clr-namespace:Content.Client.UserInterface.Systems.Inventory.Widgets"
     xmlns:targeting="clr-namespace:Content.Client._Shitmed.UserInterface.Systems.Targeting.Widgets"
+    xmlns:battle="clr-namespace:Content.Client.Humanity.Combat"
     Name="SeparatedChatHud"
     VerticalExpand="False"
     VerticalAlignment="Bottom"
@@ -24,6 +25,7 @@
                          HorizontalExpand="True"
                          VerticalExpand="True">
             <controls:MainViewport Name="MainViewport"/>
+            <battle:BattleScoreControl Name="BattleScore" Access="Protected"/>
             <widgets:GhostGui Name="Ghost"
                               Access="Protected"/>
             <inventory:InventoryGui Name="Inventory"

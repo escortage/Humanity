@@ -1,9 +1,11 @@
 using Content.Shared.MouseRotator;
+using Content.Client.Humanity.Combat;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Client.Input;
 using Robust.Client.Player;
 using Robust.Client.Timing;
+using Robust.Client.UserInterface;
 using Robust.Shared.Map;
 using Robust.Shared.Timing;
 
@@ -17,6 +19,7 @@ public sealed partial class MouseRotatorSystem : SharedMouseRotatorSystem
     [Dependency] private IClientGameTiming _timing = default!;
     [Dependency] private IEyeManager _eye = default!;
     [Dependency] private TransformSystem _transform = default!;
+    [Dependency] private IUserInterfaceManager _ui = default!;
 
     private EntityUid _renderRotationOverride;
     private Angle _renderRotation;
@@ -177,6 +180,12 @@ public sealed partial class MouseRotatorSystem : SharedMouseRotatorSystem
 
     private bool TryGetMouseAngle(EntityUid player, TransformComponent xform, out Angle angle)
     {
+        if (!GameplayAimInput.CanAim(_ui))
+        {
+            angle = default;
+            return false;
+        }
+
         var mapPos = _eye.PixelToMap(_input.MouseScreenPosition);
         var playerPos = _transform.GetRenderMapCoordinates((player, xform));
 
