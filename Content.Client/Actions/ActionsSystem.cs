@@ -69,6 +69,13 @@ namespace Content.Client.Actions
         public override void UpdateAction(Entity<ActionComponent> ent)
         {
             base.UpdateAction(ent);
+            if (TryComp<SpriteComponent>(ent, out var sprite)
+                && _sprite.LayerExists((ent.Owner, sprite), ActionVisuals.IconToggled))
+            {
+                _sprite.LayerSetVisible((ent.Owner, sprite), ActionVisuals.Icon, !ent.Comp.Toggled);
+                _sprite.LayerSetVisible((ent.Owner, sprite), ActionVisuals.IconToggled, ent.Comp.Toggled);
+            }
+
             if (_playerManager.LocalEntity != ent.Comp.AttachedEntity)
                 return;
 

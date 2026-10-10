@@ -8,7 +8,6 @@ using Content.Server.Chat.Systems;
 using Robust.Shared.Physics;
 using Content.Shared.GameTicking.Components;
 using Robust.Shared.Physics.Components;
-using System.Collections.Generic;
 
 namespace Content.Server.GameTicking.Rules;
 
@@ -29,7 +28,6 @@ public sealed partial class GracewallRuleSystem : GameRuleSystem<GracewallRuleCo
     {
         base.Initialize();
 
-        SubscribeLocalEvent<GracewallAreaComponent, StartCollideEvent>(OnStartCollide);
         SubscribeLocalEvent<GracewallAreaComponent, PreventCollideEvent>(OnPreventCollide);
     }
 
@@ -51,8 +49,8 @@ public sealed partial class GracewallRuleSystem : GameRuleSystem<GracewallRuleCo
         Log.Info($"Grace wall active for {component.GracewallDuration.TotalMinutes} minutes.");
 
         // Activate all grace wall areas
-        var query = EntityQueryEnumerator<GracewallAreaComponent, TransformComponent, FixturesComponent>();
-        while (query.MoveNext(out var wallUid, out var area, out var xform, out var fixtures))
+        var query = EntityQueryEnumerator<GracewallAreaComponent, FixturesComponent>();
+        while (query.MoveNext(out var wallUid, out var area, out var fixtures))
         {
             area.GracewallActive = true;
             UpdateGracewallPhysics(wallUid, area, fixtures, true);
@@ -100,6 +98,20 @@ public sealed partial class GracewallRuleSystem : GameRuleSystem<GracewallRuleCo
         }
     }
 
+    public bool TryStartBattle()
+    {
+        if (GameTicker.RunLevel != GameRunLevel.InRound)
+            return false;
+
+        var query = EntityQueryEnumerator<GracewallRuleComponent, GameRuleComponent>();
+        while (query.MoveNext(out var uid, out var gracewall, out var rule))
+        {
+            if (gracewall.GracewallActive && GameTicker.IsGameRuleActive((uid, rule)))
+                return GameTicker.EndGameRule((uid, rule));
+        }
+        return false;
+    }
+
     private void DeactivateAllGraceWalls(GracewallRuleComponent component)
     {
         component.GracewallActive = false;
@@ -131,13 +143,6 @@ public sealed partial class GracewallRuleSystem : GameRuleSystem<GracewallRuleCo
         // Ensure the change takes effect immediately
         if (TryComp<PhysicsComponent>(uid, out var physics))
             _physics.WakeBody(uid, body: physics);
-    }
-
-    private void OnStartCollide(EntityUid uid, GracewallAreaComponent component, ref StartCollideEvent args)
-    {
-        // This event is kept minimal to reduce lag
-        if (!component.GracewallActive)
-            return;
     }
 
     private bool CheckPassable(EntityUid entityTryingToPass, GracewallAreaComponent component)

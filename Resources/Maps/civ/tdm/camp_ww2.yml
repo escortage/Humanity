@@ -36,6 +36,8 @@ entities:
     - type: GridTree
     - type: Broadphase
     - type: OccluderTree
+    - type: WorldWarAmbience
+      soundscape: HumanityWorldWarTwo
     - type: CivResearch
       isTDM: True
       maxResearch: 600

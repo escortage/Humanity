@@ -96,19 +96,26 @@ public sealed partial class ContentAudioSystem : SharedContentAudioSystem
         // Just in case
         // TODO: Maybe handle the removals by making it seamless?
         _fadingIn.Remove(stream.Value);
+        if (component.Volume <= MinVolume)
+        {
+            _fadingOut.Remove(stream.Value);
+            _audio.Stop(stream);
+            return;
+        }
         var diff = component.Volume - MinVolume;
-        _fadingOut.Add(stream.Value, diff / duration);
+        _fadingOut[stream.Value] = diff / duration;
     }
 
     public void FadeIn(EntityUid? stream, AudioComponent? component = null, float duration = DefaultDuration)
     {
-        if (stream == null || duration <= 0f || !Resolve(stream.Value, ref component) || component.Volume < MinVolume)
+        if (stream == null || duration <= 0f || !Resolve(stream.Value, ref component) ||
+            component.Volume < MinVolume || _fadingIn.ContainsKey(stream.Value))
             return;
 
         _fadingOut.Remove(stream.Value);
         var curVolume = component.Volume;
         var change = (MinVolume - curVolume) / duration;
-        _fadingIn.Add(stream.Value, (change, component.Volume));
+        _fadingIn[stream.Value] = (change, component.Volume);
         component.Volume = MinVolume;
     }
 

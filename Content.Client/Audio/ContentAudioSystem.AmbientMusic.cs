@@ -116,7 +116,7 @@ public sealed partial class ContentAudioSystem
     {
         // If scoreboard shows then just stop the music
         _ambientMusicStream = _audio.Stop(_ambientMusicStream);
-        _nextAudio = TimeSpan.FromMinutes(3);
+        _nextAudio = _timing.CurTime + TimeSpan.FromMinutes(3);
     }
 
     private void RefreshTracks(SoundSpecifier sound, List<ResPath> tracks, ResPath? lastPlayed)
@@ -158,8 +158,10 @@ public sealed partial class ContentAudioSystem
 
         if (TryComp(_ambientMusicStream, out AudioComponent? audioComp))
         {
-            isDone = !audioComp.Playing;
+            isDone = audioComp.State == AudioState.Stopped;
         }
+        else if (_ambientMusicStream != null)
+            isDone = true;
 
         if (_interruptable)
         {
@@ -209,7 +211,7 @@ public sealed partial class ContentAudioSystem
             track.ToString(),
             Filter.Local(),
             false,
-            AudioParams.Default.AddVolume(_musicProto.Sound.Params.Volume + _volumeSlider));
+            _musicProto.Sound.Params.AddVolume(_volumeSlider));
 
         _ambientMusicStream = strim?.Entity;
 
