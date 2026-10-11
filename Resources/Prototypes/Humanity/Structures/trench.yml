@@ -1,0 +1,23 @@
+- type: entity
+  id: HumanityTrenchGrid
+  name: окопы
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: BattleTrench
+    bodyDepth: 0.3
+    enterDelay: 1
+    explosionDamageMultiplier: 0.75
+    proneExplosionDamageMultiplier: 0.5
+
+- type: entity
+  id: HumanityTrenchEdge
+  name: край окопа
+  categories: [ HideSpawnMenu ]
+  components:
+  - type: Transform
+    anchored: true
+  - type: Sprite
+    sprite: Civ14/Structures/barricades.rsi
+    state: dirt_wall_66%
+    drawdepth: FloorObjects
+    noRot: true

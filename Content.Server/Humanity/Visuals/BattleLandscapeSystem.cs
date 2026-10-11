@@ -1,4 +1,3 @@
-using System.Linq;
 using System.Numerics;
 using Content.Shared.Barricade;
 using Content.Shared.Civ14.CivResearch;
@@ -7,7 +6,6 @@ using Content.Shared.Explosion;
 using Content.Shared.Explosion.Components;
 using Content.Shared.Humanity.Visuals;
 using Robust.Shared.Map;
-using Robust.Shared.Random;
 using Robust.Shared.Prototypes;
 
 namespace Content.Server.Humanity.Visuals;
@@ -17,7 +15,6 @@ public sealed partial class BattleLandscapeSystem : EntitySystem
     private static readonly EntProtoId RubblePrototype = "HumanityBattleRubble";
     [Dependency] private SharedMapSystem _maps = default!;
     [Dependency] private SharedTransformSystem _transforms = default!;
-    [Dependency] private IRobustRandom _random = default!;
     [Dependency] private IPrototypeManager _prototypes = default!;
     private readonly HashSet<EntityUid> _explosions = new();
     private readonly Dictionary<EntityUid, Queue<EntityUid>> _scars = new();
@@ -26,6 +23,18 @@ public sealed partial class BattleLandscapeSystem : EntitySystem
     {
         base.Initialize();
         SubscribeLocalEvent<BarricadeComponent, DestructionEventArgs>(OnDestroyed);
+        SubscribeLocalEvent<ExplosionVisualsComponent, ComponentShutdown>(OnExplosionShutdown);
+        SubscribeLocalEvent<MapRemovedEvent>(OnMapRemoved);
+    }
+
+    private void OnExplosionShutdown(Entity<ExplosionVisualsComponent> ent, ref ComponentShutdown args)
+    {
+        _explosions.Remove(ent.Owner);
+    }
+
+    private void OnMapRemoved(MapRemovedEvent args)
+    {
+        _scars.Remove(args.Uid);
     }
 
     private void OnDestroyed(EntityUid uid, BarricadeComponent component, DestructionEventArgs args)
@@ -46,7 +55,6 @@ public sealed partial class BattleLandscapeSystem : EntitySystem
         var scar = Comp<BattleScarComponent>(uid);
         if (tileCount is { } count)
             scar.Radius = Math.Clamp(count * scar.RadiusPerTile, scar.MinimumRadius, scar.MaximumRadius);
-        scar.Seed = _random.Next(1, int.MaxValue);
         Dirty(uid, scar);
         if (!_scars.TryGetValue(map, out var marks))
             _scars[map] = marks = new Queue<EntityUid>();
@@ -62,7 +70,6 @@ public sealed partial class BattleLandscapeSystem : EntitySystem
     public override void Update(float frameTime)
     {
         base.Update(frameTime);
-        _explosions.RemoveWhere(uid => Deleted(uid));
         var query = EntityQueryEnumerator<ExplosionVisualsComponent>();
         while (query.MoveNext(out var uid, out var explosion))
         {
@@ -70,11 +77,6 @@ public sealed partial class BattleLandscapeSystem : EntitySystem
                 _prototypes.Index<ExplosionPrototype>(explosion.ExplosionType).Crater is not { } prototype)
                 continue;
             CreateScar(explosion.Epicenter, prototype, explosion.Intensity.Count);
-        }
-        foreach (var map in _scars.Keys.ToArray())
-        {
-            if (Deleted(map))
-                _scars.Remove(map);
         }
     }
 }

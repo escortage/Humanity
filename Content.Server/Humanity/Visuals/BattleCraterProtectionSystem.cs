@@ -30,11 +30,14 @@ public sealed partial class BattleCraterProtectionSystem : EntitySystem
 
     private float GetDamageMultiplier(EntityUid uid, StandingStateComponent standing)
     {
+        var multiplier = _entry.TryGetTrench(uid, out var trench)
+            ? Math.Clamp(standing.Standing ? trench.ExplosionDamageMultiplier : trench.ProneExplosionDamageMultiplier, 0f, 1f)
+            : 1f;
         if (!TryComp<BattleCraterEntryComponent>(uid, out var entry)
-            || !entry.Entered || entry.Crater is not { } crater || !_entry.IsInside(uid, crater))
-            return 1f;
+            || !entry.Entered || entry.Crater is not { } crater
+            || !TryComp<BattleScarComponent>(crater, out var scar) || !_entry.IsInside(uid, crater))
+            return multiplier;
 
-        var scar = Comp<BattleScarComponent>(crater);
-        return Math.Clamp(standing.Standing ? scar.ExplosionDamageMultiplier : scar.ProneExplosionDamageMultiplier, 0f, 1f);
+        return MathF.Min(multiplier, Math.Clamp(standing.Standing ? scar.ExplosionDamageMultiplier : scar.ProneExplosionDamageMultiplier, 0f, 1f));
     }
 }

@@ -7,6 +7,7 @@
   - type: Sprite
     sprite: Civ14/Structures/closet.rsi
     state: dresser
+    snapCardinals: false
 - type: entity
   id: DresserCivLeft
   parent: Dresser
@@ -16,6 +17,7 @@
   - type: Sprite
     sprite: Civ14/Structures/closet.rsi
     state: dresser2_left
+    snapCardinals: false
 - type: entity
   id: DresserCivRight
   parent: Dresser
@@ -25,6 +27,7 @@
   - type: Sprite
     sprite: Civ14/Structures/closet.rsi
     state: dresser2_right
+    snapCardinals: false
 - type: entity
   id: CabinetCiv
   parent: BaseStructureDynamic

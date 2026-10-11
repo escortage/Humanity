@@ -24,6 +24,7 @@ public sealed partial class NpcFactionSystem : EntitySystem
         base.Initialize();
 
         SubscribeLocalEvent<NpcFactionMemberComponent, ComponentStartup>(OnFactionStartup);
+        SubscribeLocalEvent<NpcFactionMemberComponent, AfterAutoHandleStateEvent>(OnFactionState);
         SubscribeLocalEvent<PrototypesReloadedEventArgs>(OnProtoReload);
 
         InitializeException();
@@ -37,6 +38,11 @@ public sealed partial class NpcFactionSystem : EntitySystem
     }
 
     private void OnFactionStartup(Entity<NpcFactionMemberComponent> ent, ref ComponentStartup args)
+    {
+        RefreshFactions(ent);
+    }
+
+    private void OnFactionState(Entity<NpcFactionMemberComponent> ent, ref AfterAutoHandleStateEvent args)
     {
         RefreshFactions(ent);
     }
@@ -113,6 +119,8 @@ public sealed partial class NpcFactionSystem : EntitySystem
         if (!ent.Comp.Factions.Add(faction))
             return;
 
+        Dirty(ent);
+
         if (dirty)
             RefreshFactions((ent, ent.Comp));
     }
@@ -135,6 +143,8 @@ public sealed partial class NpcFactionSystem : EntitySystem
             ent.Comp.Factions.Add(faction);
         }
 
+        Dirty(ent);
+
         if (dirty)
             RefreshFactions((ent, ent.Comp));
     }
@@ -156,6 +166,8 @@ public sealed partial class NpcFactionSystem : EntitySystem
         if (!ent.Comp.Factions.Remove(faction))
             return;
 
+        Dirty(ent);
+
         if (dirty)
             RefreshFactions((ent, ent.Comp));
     }
@@ -169,6 +181,7 @@ public sealed partial class NpcFactionSystem : EntitySystem
             return;
 
         ent.Comp.Factions.Clear();
+        Dirty(ent);
 
         if (dirty)
             RefreshFactions((ent, ent.Comp));

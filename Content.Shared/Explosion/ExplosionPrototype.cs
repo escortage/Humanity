@@ -34,6 +34,9 @@ public sealed partial class ExplosionPrototype : IPrototype
     [DataField]
     public EntProtoId? Crater;
 
+    [DataField]
+    public bool BattleEffects;
+
     /// <summary>
     ///     Amount of firestacks to apply in addition to igniting.
     /// </summary>

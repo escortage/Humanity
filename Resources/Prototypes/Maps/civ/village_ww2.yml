@@ -1,0 +1,29 @@
+- type: gameMap
+  id: VillageWW2
+  mapName: Деревня
+  mapPath: /Maps/civ/tdm/village_ww2.yml
+  minPlayers: 0
+  maxPlayers: 40
+  maxRandomOffset: 0
+  randomRotation: false
+  fixedPreset: TDMWW2
+  stations:
+    VillageWW2:
+      stationProto: StandardStationTDM
+      components:
+      - type: StationNameSetup
+        mapNameTemplate: Деревня
+      - type: StationJobs
+        availableJobs:
+          GermanCaptain: [1, 1]
+          GermanSergeant: [2, 2]
+          GermanSubmachineGunner: [3, 3]
+          GermanRifleman: [10, 10]
+          GermanMachinegunner: [2, 2]
+          GermanMedic: [2, 2]
+          SovietCaptain: [1, 1]
+          SovietSergeant: [2, 2]
+          SovietSubmachineGunner: [3, 3]
+          SovietRifleman: [10, 10]
+          SovietMachinegunner: [2, 2]
+          SovietMedic: [2, 2]

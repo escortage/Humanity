@@ -32,11 +32,7 @@ public sealed class NomadLandscapeSystem : EntitySystem
     private void OnBuilt(EntityUid uid, ConstructionComponent component, ConstructionChangeEntityEvent args)
     {
         if (uid == args.Old)
-        {
             Emit(uid, NomadWorkEffect.Building);
-            if (TryComp<CivResearchComponent>(Transform(uid).MapUid, out var research) && !research.IsTDM)
-                EnsureComp<NomadCampFootprintComponent>(args.New);
-        }
     }
 
     private void OnChop(EntityUid uid, TreeBranchesComponent component, DamageChangedEvent args)
@@ -61,15 +57,6 @@ public sealed class NomadLandscapeSystem : EntitySystem
         if (_elapsed < 2f)
             return;
         _elapsed = 0;
-        var camps = EntityQueryEnumerator<NomadCampFootprintComponent, TransformComponent>();
-        while (camps.MoveNext(out var campUid, out var camp, out var transform))
-        {
-            if (!transform.Anchored || camp.Wear >= 1 ||
-                !TryComp<CivResearchComponent>(transform.MapUid, out var research) || research.IsTDM)
-                continue;
-            camp.Wear = Math.Min(1f, camp.Wear + 2f / 600f);
-            Dirty(campUid, camp);
-        }
         _configured.RemoveWhere(uid => Deleted(uid));
         var maps = EntityQueryEnumerator<CivResearchComponent, MapLightComponent>();
         while (maps.MoveNext(out var uid, out var research, out var light))

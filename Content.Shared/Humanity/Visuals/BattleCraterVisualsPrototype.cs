@@ -34,6 +34,9 @@ public sealed partial class BattleCraterVisualsPrototype : IPrototype
     public Color EdgeColor;
 
     [DataField]
+    public Vector2 EdgeRoughness = new(0.045f, 0.035f);
+
+    [DataField]
     public float InteriorRadiusFactor = 0.8f;
 
     [DataField]

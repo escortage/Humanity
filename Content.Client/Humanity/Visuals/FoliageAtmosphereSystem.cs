@@ -40,7 +40,6 @@ public sealed partial class FoliageAtmosphereSystem : EntitySystem
         SubscribeLocalEvent<FoliageAtmosphereComponent, ComponentStartup>(OnStartup);
         SubscribeLocalEvent<FoliageAtmosphereComponent, ComponentShutdown>(OnShutdown);
         _overlays.AddOverlay(new FallingLeavesOverlay(this));
-        _overlays.AddOverlay(new HumanityGroundOverlay(EntityManager));
     }
 
     private void OnStartup(EntityUid uid, FoliageAtmosphereComponent component, ref ComponentStartup args)
@@ -70,7 +69,6 @@ public sealed partial class FoliageAtmosphereSystem : EntitySystem
     public override void Shutdown()
     {
         _overlays.RemoveOverlay<FallingLeavesOverlay>();
-        _overlays.RemoveOverlay<HumanityGroundOverlay>();
         foreach (var shader in _shaders.Values)
             shader.Dispose();
         _shaders.Clear();

@@ -18,9 +18,6 @@ public sealed partial class BattleScarComponent : Component
     public float MaximumRadius = 1.8f;
 
     [DataField, AutoNetworkedField]
-    public int Seed;
-
-    [DataField, AutoNetworkedField]
     public bool Rubble;
 
     [DataField]

@@ -15,8 +15,6 @@
         state: stone_hammer
         scale: 0.35,0.35
         offset: -0.2,0.08
-    - type: NomadCampFootprint
-      radius: 0.8
     - type: Construction
       graph: HumanityResearchTable
       node: end

@@ -1,5 +1,7 @@
+using System.Diagnostics.CodeAnalysis;
 using Content.Shared.DoAfter;
 using Content.Shared.Standing;
+using Robust.Shared.Map.Components;
 using Robust.Shared.Prototypes;
 using Robust.Shared.Map;
 using Robust.Shared.Timing;
@@ -14,8 +16,19 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
     [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private SharedDoAfterSystem _doAfter = default!;
     [Dependency] private IGameTiming _timing = default!;
+    [Dependency] private SharedMapSystem _maps = default!;
 
     private bool _moving;
+
+    public bool TryGetTrench(EntityUid uid, [NotNullWhen(true)] out BattleTrenchComponent? trench)
+    {
+        var transform = Transform(uid);
+        trench = null;
+        return transform.GridUid is { } grid
+            && TryComp(grid, out trench)
+            && TryComp<MapGridComponent>(grid, out var mapGrid)
+            && trench.Tiles.Contains(_maps.TileIndicesFor(grid, mapGrid, transform.Coordinates));
+    }
 
     public override void Initialize()
     {
@@ -31,7 +44,8 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
             return;
 
         ent.Comp.Action = null;
-        if (ent.Comp.Crater is not { } crater || !Exists(crater))
+        if (ent.Comp.Crater is not { } crater || !Exists(crater)
+            || HasComp<BattleScarComponent>(crater) && TryGetTrench(crater, out _))
         {
             ent.Comp.Crater = null;
             ent.Comp.Entered = false;
@@ -60,38 +74,58 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
 
         if (TryComp<BattleCraterEntryComponent>(ent, out var entry) && entry.Crater is { } current)
         {
-            var inside = IsInside(ent, current, true);
-            if (entry.Action != null)
+            if (HasComp<BattleScarComponent>(current) && TryGetTrench(current, out _))
             {
-                if (inside != entry.Entered)
-                    RestorePosition(ent, args.OldPosition);
-                return;
+                if (entry.Action is { } action)
+                    _doAfter.Cancel(new DoAfterId(ent, action));
+                entry.Action = null;
             }
-            if (entry.Entered && inside)
-                return;
-
-            if (entry.Entered && TryComp<BattleScarComponent>(current, out _) && HasComp<DoAfterComponent>(ent))
+            else
             {
-                StartCrossing((ent, entry), current, args);
-                return;
+                var inside = IsInside(ent, current, true);
+                if (entry.Action != null)
+                {
+                    if (inside != entry.Entered)
+                        RestorePosition(ent, args.OldPosition);
+                    return;
+                }
+                if (entry.Entered && inside)
+                    return;
+
+                if (entry.Entered && TryComp<BattleScarComponent>(current, out _) && HasComp<DoAfterComponent>(ent))
+                {
+                    StartCrossing((ent, entry), current, args);
+                    return;
+                }
             }
             entry.Crater = null;
             entry.Entered = false;
             Dirty(ent, entry);
         }
 
-        if (!HasComp<DoAfterComponent>(ent) || FindCrater(ent, ent.Comp) is not { } crater)
+        if (!HasComp<DoAfterComponent>(ent))
             return;
 
+        var crater = TryGetTrench(ent, out _)
+            ? Transform(ent).GridUid
+            : FindCrater(ent, ent.Comp);
+        if (crater == null)
+            return;
         entry = EnsureComp<BattleCraterEntryComponent>(ent);
-        StartCrossing((ent, entry), crater, args);
+        StartCrossing((ent, entry), crater.Value, args);
     }
 
     private void StartCrossing(Entity<BattleCraterEntryComponent> ent, EntityUid crater, MoveEvent args)
     {
         RestorePosition(ent, args.OldPosition);
-        var scar = Comp<BattleScarComponent>(crater);
-        var delay = ent.Comp.Entered ? scar.ExitDelay : scar.EnterDelay;
+        TimeSpan delay;
+        if (TryComp<BattleTrenchComponent>(crater, out var trench))
+            delay = trench.EnterDelay;
+        else
+        {
+            var scar = Comp<BattleScarComponent>(crater);
+            delay = ent.Comp.Entered ? scar.ExitDelay : scar.EnterDelay;
+        }
         var doAfter = new DoAfterArgs(EntityManager, ent, delay,
             new BattleCraterEnterDoAfterEvent(), ent, target: crater)
         {
@@ -133,7 +167,10 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
 
     public bool IsInside(EntityUid uid, EntityUid crater, bool includeRim = false)
     {
-        if (!TryComp<BattleScarComponent>(crater, out var scar) || scar.Rubble || scar.Radius <= 0)
+        if (HasComp<BattleTrenchComponent>(crater))
+            return Transform(uid).GridUid == crater && TryGetTrench(uid, out _);
+        if (!TryComp<BattleScarComponent>(crater, out var scar) || scar.Rubble || scar.Radius <= 0
+            || TryGetTrench(crater, out _))
             return false;
         var transform = Transform(uid);
         var craterTransform = Transform(crater);
@@ -157,7 +194,8 @@ public sealed partial class BattleCraterEntrySystem : EntitySystem
         var craters = EntityQueryEnumerator<BattleScarComponent, TransformComponent>();
         while (craters.MoveNext(out var crater, out var scar, out var craterTransform))
         {
-            if (scar.Rubble || scar.Radius <= 0 || craterTransform.GridUid != transform.GridUid)
+            if (scar.Rubble || scar.Radius <= 0 || craterTransform.GridUid != transform.GridUid
+                || TryGetTrench(crater, out _))
                 continue;
 
             if (!visuals.Contains(position - _transforms.GetWorldPosition(craterTransform), scar.Radius, visuals.BaseEdgeRadius))

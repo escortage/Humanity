@@ -1,5 +1,6 @@
 - type: explosion
   id: CivDefault
+  battleEffects: true
   crater: HumanityBattleCrater
   bodyPartDamageMultiplier: 0.3
   limbDamageMultiplier: 2
@@ -25,6 +26,7 @@
 
 - type: explosion
   id: CivGrenade
+  battleEffects: true
   crater: HumanityBattleCrater
   bodyPartDamageMultiplier: 0.3
   limbDamageMultiplier: 2

@@ -13,7 +13,7 @@
 
 - type: gameMapPool
   id: HumanityWorldWarTwoMaps
-  maps: [ CampWW2, Opushka ]
+  maps: [ VillageWW2 ]
 
 - type: entity
   parent: TeamDeathMatchRule

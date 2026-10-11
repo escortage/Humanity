@@ -39,14 +39,12 @@ public sealed partial class NomadLandscapeSystem : EntitySystem
     {
         base.Initialize();
         _overlays.AddOverlay(new NomadLandscapeOverlay(this) { ZIndex = 110 });
-        _overlays.AddOverlay(new NomadWaterOverlay(EntityManager));
         SubscribeAllEvent<NomadWorkEffectEvent>(OnWork);
     }
 
     public override void Shutdown()
     {
         _overlays.RemoveOverlay<NomadLandscapeOverlay>();
-        _overlays.RemoveOverlay<NomadWaterOverlay>();
         _positions.Clear();
         Marks.Clear();
         _water.Clear();

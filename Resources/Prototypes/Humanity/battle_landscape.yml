@@ -25,6 +25,11 @@
   id: HumanityBattleRubble
   name: обломки
   components:
+  - type: Sprite
+    sprite: Civ14/Objects/structures.rsi
+    state: debris1
+    drawdepth: FloorObjects
+    noRot: true
   - type: BattleScar
     radius: 0.5
     rubble: true
@@ -36,6 +41,7 @@
   bodyDepth: 0.18
   mergeRadiusFactor: 0.9
   baseEdgeRadius: 0.88
+  edgeRoughness: 0.045,0.035
   interiorDepth: 0.16
   rimDepth: 0.07
   interiorColor: "#343023"

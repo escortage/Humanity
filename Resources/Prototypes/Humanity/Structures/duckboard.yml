@@ -1,0 +1,23 @@
+- type: entity
+  id: HumanityDuckboard
+  parent: BaseStructure
+  name: деревянный настил
+  description: Доски, уложенные поверх земли, чтобы не идти по грязи.
+  components:
+  - type: Sprite
+    sprite: Civ14/Structures/Floors/wood.rsi
+    state: wood
+    drawdepth: FloorTiles
+  - type: Physics
+    canCollide: false
+  - type: Damageable
+  - type: Destructible
+    thresholds:
+    - trigger: !type:DamageTrigger
+        damage: 40
+      behaviors:
+      - !type:DoActsBehavior
+        acts:
+        - Destruction
+  - type: Injurable
+    damageContainer: Inorganic

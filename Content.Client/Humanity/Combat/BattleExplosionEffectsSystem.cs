@@ -1,5 +1,7 @@
 using System.Numerics;
+using Content.Shared.Explosion;
 using Content.Shared.Explosion.Components;
+using Robust.Shared.Prototypes;
 using Robust.Client.GameObjects;
 using Robust.Client.Graphics;
 using Robust.Shared.Map;
@@ -11,6 +13,7 @@ namespace Content.Client.Humanity.Combat;
 
 public sealed partial class BattleExplosionEffectsSystem : EntitySystem
 {
+    [Dependency] private IPrototypeManager _prototypes = default!;
     [Dependency] private IRobustRandom _random = default!;
     [Dependency] private TransformSystem _transforms = default!;
     [Dependency] private IOverlayManager _overlays = default!;
@@ -34,7 +37,7 @@ public sealed partial class BattleExplosionEffectsSystem : EntitySystem
             return;
         if (_overlays.TryGetOverlay<HumanityAtmosphereOverlay>(out var fog))
             fog.Disperse(explosion.Epicenter, explosion.Intensity.Count * 1.2f);
-        if (explosion.ExplosionType is not ("CivGrenade" or "CivDefault"))
+        if (!_prototypes.Index<ExplosionPrototype>(explosion.ExplosionType).BattleEffects)
             return;
 
         Spawn("HumanityBlastFlash", explosion.Epicenter);

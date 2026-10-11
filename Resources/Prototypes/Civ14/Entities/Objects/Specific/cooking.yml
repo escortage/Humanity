@@ -79,8 +79,6 @@
       needsPower: false
       powerLoad: 0
     - type: FireAtmosphere
-    - type: NomadCampFootprint
-      charred: true
     - type: PointLight
       enabled: false
       radius: 4
