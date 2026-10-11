@@ -1,7 +1,7 @@
 {
   "version": 1,
   "license": "CC0-1.0",
-  "copyright": "Created for Humanity, 2026. Released under CC0-1.0.",
+  "copyright": "escortage",
   "size": { "x": 32, "y": 32 },
   "states": [ { "name": "reeds" } ]
 }

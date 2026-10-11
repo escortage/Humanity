@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "license": "AGPL-3.0",
+  "copyright": "escortage",
+  "size": {
+    "x": 32,
+    "y": 32
+  },
+  "states": [
+    {
+      "name": "icon",
+      "directions": 1
+    },
+    {
+      "name": "inhand-left",
+      "directions": 4
+    },
+    {
+      "name": "inhand-right",
+      "directions": 4
+    }
+  ]
+}

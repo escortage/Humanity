@@ -39,7 +39,7 @@ public sealed partial class GracewallRuleSystem : GameRuleSystem<GracewallRuleCo
         {
             area.GracewallActive = true;
             Dirty(wallUid, area);
-            UpdateGracewallPhysics(wallUid, area, fixtures, true);
+            UpdateGracewallPhysics(wallUid, fixtures, true);
         }
     }
 
@@ -98,17 +98,17 @@ public sealed partial class GracewallRuleSystem : GameRuleSystem<GracewallRuleCo
         var query = EntityQueryEnumerator<GracewallAreaComponent, FixturesComponent>();
         while (query.MoveNext(out var wallUid, out var area, out var fixtures))
         {
-            if (area.Permanent == false)
-            {
-                area.GracewallActive = false;
-                UpdateGracewallPhysics(wallUid, area, fixtures, false);
-                Dirty(wallUid, area);
-                QueueDel(wallUid);
-            }
+            if (area.Permanent)
+                continue;
+
+            area.GracewallActive = false;
+            UpdateGracewallPhysics(wallUid, fixtures, false);
+            Dirty(wallUid, area);
+            QueueDel(wallUid);
         }
     }
 
-    private void UpdateGracewallPhysics(EntityUid uid, GracewallAreaComponent component, FixturesComponent fixtures, bool active)
+    private void UpdateGracewallPhysics(EntityUid uid, FixturesComponent fixtures, bool active)
     {
         // Check if the specific fixture we defined in the prototype exists
         if (!fixtures.Fixtures.TryGetValue("gracewall", out var fixture))

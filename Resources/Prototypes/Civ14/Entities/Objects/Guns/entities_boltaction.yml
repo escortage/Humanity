@@ -316,14 +316,21 @@
 
 - type: entity
   name: "винтовка Мосина образца 1891/30 года"
-  parent: civ13_boltaction_Mosin
+  parent: [civ13_boltaction_Mosin, BaseHumanityBayonetWeapon]
   id: civ13_boltaction_Mosin_30
   description: "Модернизированная винтовка Мосина с продольно-скользящим затвором под патрон 7,62 × 54 мм R."
   components:
     - type: Sprite
-      sprite: Civ14/Weapons/Guns/mosin30.rsi
+      sprite: Humanity/Weapons/mosin30_bayonet.rsi
+      layers:
+      - state: icon
+        map: ["enum.GunVisualLayers.Base"]
+      - state: mag-0
+        map: ["enum.GunVisualLayers.Mag"]
+    - type: Item
+      sprite: Humanity/Weapons/mosin30_bayonet.rsi
     - type: Clothing
-      sprite: Civ14/Weapons/Guns/mosin30.rsi
+      sprite: Humanity/Weapons/mosin30_bayonet.rsi
       quickEquip: false
       slots:
         - Back
@@ -339,6 +346,18 @@
       whitelist:
         tags:
           - civ13_caliber_a762x54
+
+    - type: ItemSlots
+      slots:
+        bayonet:
+          startingItem: HumanityMosinBayonet
+          insertVerbText: humanity-bayonet-attach
+          ejectVerbText: humanity-bayonet-detach
+          insertSound: /Audio/Items/sheath.ogg
+          ejectSound: /Audio/Items/unsheath.ogg
+          whitelist:
+            tags:
+            - HumanityMosinBayonet
 
 - type: entity
   name: "обрез винтовки Мосина"
@@ -685,14 +704,21 @@
 
 - type: entity
   name: "карабин 98k"
-  parent: civ13_boltaction_Gewehr_98
+  parent: [civ13_boltaction_Gewehr_98, BaseHumanityBayonetWeapon]
   id: civ13_boltaction_Karabiner_98k
   description: "Укороченная и модернизированная версия винтовки Gewehr 98 под патрон 7,92 × 57 мм Mauser."
   components:
     - type: Sprite
-      sprite: Civ14/Weapons/Guns/kar98k.rsi
+      sprite: Humanity/Weapons/kar98k_bayonet.rsi
+      layers:
+      - state: icon
+        map: ["enum.GunVisualLayers.Base"]
+      - state: mag-0
+        map: ["enum.GunVisualLayers.Mag"]
+    - type: Item
+      sprite: Humanity/Weapons/kar98k_bayonet.rsi
     - type: Clothing
-      sprite: Civ14/Weapons/Guns/kar98k.rsi
+      sprite: Humanity/Weapons/kar98k_bayonet.rsi
       quickEquip: false
       slots:
         - Back
@@ -700,6 +726,18 @@
       angleIncrease: 21
       angleDecay: 36
       # Other stats inherited from Gewehr 98
+
+    - type: ItemSlots
+      slots:
+        bayonet:
+          startingItem: HumanityKar98kBayonet
+          insertVerbText: humanity-bayonet-attach
+          ejectVerbText: humanity-bayonet-detach
+          insertSound: /Audio/Items/sheath.ogg
+          ejectSound: /Audio/Items/unsheath.ogg
+          whitelist:
+            tags:
+            - HumanityKar98kBayonet
 
 - type: entity
   name: Chiang Kai-Shek Rifle

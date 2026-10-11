@@ -1,0 +1,65 @@
+- type: Tag
+  id: HumanityMosinBayonet
+
+- type: entity
+  abstract: true
+  parent: BaseItem
+  id: BaseHumanityBayonet
+  components:
+  - type: Item
+    size: Small
+  - type: MeleeWeapon
+    attackRate: 1
+    damage:
+      types:
+        Piercing: 18
+    soundHit:
+      path: /Audio/Weapons/bladeslice.ogg
+  - type: STWeight
+    self: 0.4
+
+- type: entity
+  abstract: true
+  id: BaseHumanityBayonetWeapon
+  components:
+  - type: BayonetWeapon
+  - type: MeleeWeapon
+    attackRate: 1
+    damage:
+      types:
+        Blunt: 8
+  - type: AltFireMelee
+    attackType: Light
+
+- type: entity
+  parent: BaseHumanityBayonet
+  id: HumanityMosinBayonet
+  name: штык винтовки Мосина
+  description: Четырёхгранный игольчатый штык. Используйте его на винтовке Мосина, чтобы примкнуть к стволу.
+  components:
+  - type: Sprite
+    sprite: Humanity/Weapons/mosin_bayonet.rsi
+    state: icon
+  - type: Item
+    sprite: Humanity/Weapons/mosin_bayonet.rsi
+  - type: Tag
+    tags:
+    - HumanityMosinBayonet
+
+- type: Tag
+  id: HumanityKar98kBayonet
+
+- type: entity
+  parent: BaseHumanityBayonet
+  id: HumanityKar98kBayonet
+  name: штык-нож карабина 98k
+  description: Съёмный штык-нож для Karabiner 98k. Используйте его на карабине, чтобы примкнуть к стволу.
+  components:
+  - type: Sprite
+    sprite: Humanity/Weapons/kar98k_bayonet_item.rsi
+    state: icon
+  - type: Item
+    sprite: Humanity/Weapons/kar98k_bayonet_item.rsi
+  - type: Tag
+    tags:
+    - HumanityKar98kBayonet
