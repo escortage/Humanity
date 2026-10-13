@@ -24,7 +24,6 @@
     <File Path="README.md" />
   </Folder>
   <Project Path="Content.Client/Content.Client.csproj" />
-  <Project Path="Content.MapRenderer/Content.MapRenderer.csproj" />
   <Project Path="Content.Packaging/Content.Packaging.csproj" />
   <Project Path="Content.PatreonParser/Content.PatreonParser.csproj">
     <BuildType Solution="DebugOpt|*" Project="Debug" />
@@ -36,7 +35,6 @@
   <Project Path="Content.Shared.Database/Content.Shared.Database.csproj" />
   <Project Path="Content.Shared/Content.Shared.csproj" />
   <Project Path="Content.Tools/Content.Tools.csproj" />
-  <Project Path="Content.YAMLLinter/Content.YAMLLinter.csproj" />
   <Project Path="Pow3r/Pow3r.csproj" />
   <Folder Name="/RobustToolbox/.github/workflows/">
     <File Path="RobustToolbox/.github/workflows/benchmarks.yml" />
