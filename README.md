@@ -12,29 +12,8 @@
 
 ```powershell
 git submodule update --init --recursive
-dotnet build Content.Server -c Release
-dotnet build Content.Client -c Release
+dotnet build -c Release
 ```
-
-Запуск сервера:
-
-```powershell
-dotnet run --project Content.Server -c Release --no-build -- --config-file Resources/ConfigPresets/Civ/production.toml
-```
-
-В другом терминале запустите клиент и подключитесь к `localhost`:
-
-```powershell
-dotnet run --project Content.Client -c Release --no-build
-```
-
-На Windows можно использовать `START_SERVER.bat` и `START_CLIENT.bat`. После изменения исходников сначала повторите сборку.
-
-## Участие в разработке
-
-Об ошибках сообщайте в Discord или задачах репозитория: опишите действия для повторения и приложите журнал при сбое запуска.
-
-Тексты для игроков пишем на русском с учётом контекста. Новые C# файлы размещаем в каталоге `Humanity` соответствующего проекта.
 
 ## Лицензии
 
